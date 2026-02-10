@@ -199,7 +199,7 @@ def update_fir(fir_id):
         if sections:
             update_data['applicable_sections'] = sections
             
-        if status == 'completed':
+        if status == 'resolved':
             # Move to archives
             archived_fir = old_fir.copy()
             archived_fir.update(update_data)
@@ -211,7 +211,7 @@ def update_fir(fir_id):
             db.firs.delete_one({'_id': fir_id})
             
             # Notify user
-            msg = f"Your FIR ({fir_id[:8]}) has been marked as COMPLETED."
+            msg = f"Your FIR ({fir_id[:8]}) has been marked as RESOLVED."
             notification = {
                 '_id': str(uuid.uuid4()),
                 'user_id': old_fir['user_id'],

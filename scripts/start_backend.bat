@@ -1,11 +1,11 @@
 
 @echo off
 cd /d "%~dp0..\backend"
-if not exist "venv" (
+if not exist "final_venv" (
     echo Creating virtual environment...
-    python -m venv venv
+    python -m venv final_venv
 )
-call venv\Scripts\activate
+call final_venv\Scripts\activate
 echo Installing dependencies...
 pip install -r requirements.txt
 echo Starting Flask Server...

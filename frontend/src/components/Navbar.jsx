@@ -2,6 +2,8 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+import { Shield } from "lucide-react";
+
 const Navbar = () => {
   const { user, role, logout } = useAuth();
   const location = useLocation();
@@ -18,8 +20,9 @@ const Navbar = () => {
     <nav className="bg-primary text-primary-foreground p-4 shadow-md select-none">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo is always non-clickable and distinct */}
-        <span className="text-2xl font-extrabold tracking-wide cursor-default select-none font-serif">
-          Sahita
+        <span className="text-2xl font-extrabold tracking-wide cursor-default select-none font-serif flex items-center gap-2">
+          <Shield size={28} strokeWidth={2.5} />
+          Sahayta
         </span>
 
         <div className="space-x-4 flex items-center">

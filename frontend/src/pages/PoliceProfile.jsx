@@ -1,20 +1,28 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Shield, MapPin, User, Badge } from "lucide-react";
+import { Shield, MapPin, User, Badge, ArrowLeft } from "lucide-react";
 
 const PoliceProfile = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) return <div className="p-8 text-center">Loading profile...</div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
-      {/* Note: In Dashboard, Navbar might be hidden or different, but this is a standalone profile page */}
 
       <main className="flex-grow container mx-auto px-4 py-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors"
+        >
+          <ArrowLeft size={20} className="mr-2" /> Back to Dashboard
+        </button>
+
         <div className="max-w-2xl mx-auto bg-card border border-border rounded-lg shadow-sm p-8 official-card">
           <div className="flex items-center gap-4 mb-8 border-b pb-4">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-800">

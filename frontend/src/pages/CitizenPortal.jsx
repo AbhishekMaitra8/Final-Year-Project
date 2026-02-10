@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
+import { generateFIRPDF } from "../utils/pdfGenerator";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
@@ -11,6 +12,12 @@ import {
   Search as SearchIcon,
   ChevronDown,
   AlertCircle,
+  LogOut,
+  User,
+  Phone,
+  Mail,
+  FileText,
+  Download,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -20,7 +27,12 @@ const CitizenPortal = () => {
   const [showNotifs, setShowNotifs] = useState(false);
   const navigate = useNavigate();
   const { username } = useParams();
-  const { token, role, user } = useAuth();
+  const { token, role, user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   useEffect(() => {
     if (token && role === "citizen") {
@@ -72,73 +84,75 @@ const CitizenPortal = () => {
             </p>
           </div>
 
-          <div className="relative">
-            <button
-              onClick={() => setShowNotifs(!showNotifs)}
-              className="p-2 bg-card border rounded-full hover:bg-accent relative"
-            >
-              <Bell className="w-6 h-6 text-foreground" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-              )}
-            </button>
-            <AnimatePresence>
-              {showNotifs && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-80 bg-card border rounded-lg shadow-xl z-50 overflow-hidden"
-                >
-                  <div className="p-3 border-b font-bold flex justify-between">
-                    <span>Notifications</span>
-                    <button onClick={() => setShowNotifs(false)}>
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="p-4 text-center text-sm text-muted-foreground">
-                        No notifications.
-                      </p>
-                    ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n._id}
-                          className={`p-3 border-b hover:bg-accent/50 transition flex gap-3 ${!n.is_read ? "bg-accent/10" : ""}`}
-                        >
-                          <div className="mt-1">
-                            <div
-                              className={`w-2 h-2 rounded-full ${!n.is_read ? "bg-blue-500" : "bg-transparent"}`}
-                            />
+          <div className="flex items-center">
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifs(!showNotifs)}
+                className="p-2 bg-card border rounded-full hover:bg-accent relative"
+              >
+                <Bell className="w-6 h-6 text-foreground" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                )}
+              </button>
+              <AnimatePresence>
+                {showNotifs && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-80 bg-card border rounded-lg shadow-xl z-50 overflow-hidden"
+                  >
+                    <div className="p-3 border-b font-bold flex justify-between">
+                      <span>Notifications</span>
+                      <button onClick={() => setShowNotifs(false)}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="p-4 text-center text-sm text-muted-foreground">
+                          No notifications.
+                        </p>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n._id}
+                            className={`p-3 border-b hover:bg-accent/50 transition flex gap-3 ${!n.is_read ? "bg-accent/10" : ""}`}
+                          >
+                            <div className="mt-1">
+                              <div
+                                className={`w-2 h-2 rounded-full ${!n.is_read ? "bg-blue-500" : "bg-transparent"}`}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm">{n.message}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(n.created_at).toLocaleString()}
+                              </p>
+                              {!n.is_read && (
+                                <button
+                                  onClick={() => markRead(n._id)}
+                                  className="text-xs text-primary mt-1 hover:underline"
+                                >
+                                  Mark as read
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm">{n.message}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(n.created_at).toLocaleString()}
-                            </p>
-                            {!n.is_read && (
-                              <button
-                                onClick={() => markRead(n._id)}
-                                className="text-xs text-primary mt-1 hover:underline"
-                              >
-                                Mark as read
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </header>
 
         {/* Tabs */}
         <div className="flex space-x-1 bg-muted p-1 rounded-lg mb-8 max-w-md">
-          {["services", "new-fir", "history"].map((tab) => (
+          {["services", "new-fir", "history", "profile"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -151,6 +165,7 @@ const CitizenPortal = () => {
               {tab === "services" && "Services"}
               {tab === "new-fir" && "File FIR"}
               {tab === "history" && "My FIRs"}
+              {tab === "profile" && "Profile"}
             </button>
           ))}
         </div>
@@ -169,6 +184,7 @@ const CitizenPortal = () => {
             <NewFIRTab onSuccess={() => setActiveTab("history")} />
           )}
           {activeTab === "history" && <HistoryTab />}
+          {activeTab === "profile" && <ProfileTab />}
         </motion.div>
       </main>
       <Footer />
@@ -534,7 +550,7 @@ const HistoryTab = () => {
               </div>
               <div className="flex flex-col items-end gap-2 min-w-[120px]">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase self-end ${
                     fir.status === "pending"
                       ? "bg-yellow-100 text-yellow-800"
                       : fir.status === "accepted"
@@ -546,10 +562,16 @@ const HistoryTab = () => {
                 >
                   {fir.status.replace("_", " ")}
                 </span>
+
                 {fir.status === "resolved" && (
-                  <button className="text-xs text-primary hover:underline">
-                    Download Report
-                  </button>
+                  <div className="mt-auto pt-4">
+                    <button
+                      onClick={() => generateFIRPDF(fir)}
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                    >
+                      <Download size={14} /> Download Report
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -561,3 +583,93 @@ const HistoryTab = () => {
 };
 
 export default CitizenPortal;
+
+const ProfileTab = () => {
+  const { user } = useAuth();
+
+  if (!user) return <div className="text-center p-8">Loading profile...</div>;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center text-violet-700">
+          <User size={32} />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold">My Profile</h2>
+          <p className="text-muted-foreground">Personal Information</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-card border rounded-lg p-4 flex gap-3 items-start official-card">
+          <div className="mt-1 text-muted-foreground">
+            <User size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Full Name
+            </p>
+            <p className="font-medium text-lg">
+              {user.full_name || user.username}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card border rounded-lg p-4 flex gap-3 items-start official-card">
+          <div className="mt-1 text-muted-foreground">
+            <User size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Username
+            </p>
+            <p className="font-medium text-lg">@{user.username}</p>
+          </div>
+        </div>
+
+        <div className="bg-card border rounded-lg p-4 flex gap-3 items-start official-card">
+          <div className="mt-1 text-muted-foreground">
+            <Phone size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Phone
+            </p>
+            <p className="font-medium text-lg">
+              {user.phone || "Not Verified"}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card border rounded-lg p-4 flex gap-3 items-start official-card">
+          <div className="mt-1 text-muted-foreground">
+            <Mail size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Email
+            </p>
+            <p className="font-medium text-lg">
+              {user.email || "Not Verified"}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-card border rounded-lg p-4 flex gap-3 items-start official-card col-span-1 md:col-span-2">
+          <div className="mt-1 text-muted-foreground">
+            <FileText size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Aadhar Number
+            </p>
+            <p className="font-medium text-lg font-mono tracking-wide">
+              {user.aadhar || "Not Linked"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

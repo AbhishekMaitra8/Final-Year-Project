@@ -27,9 +27,9 @@ app.config.from_object(config[env])
 ml_service = MLService()
 
 # Initialize DB
-from db import Database
-with app.app_context():
-    Database.init_db(app)
+# Initialize DB
+from db import init_db
+init_db(app)
 
 from flask_jwt_extended import JWTManager
 app.config['JWT_SECRET_KEY'] = config[env].JWT_SECRET_KEY

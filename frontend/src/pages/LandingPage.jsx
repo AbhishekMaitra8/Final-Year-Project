@@ -26,7 +26,7 @@ const LandingPage = () => {
           </div>
 
           <h1 className="text-5xl md:text-6xl font-serif font-bold mb-4 tracking-tight text-violet-900">
-            Sahita
+            Sahayta
           </h1>
           <h2 className="text-xl md:text-2xl font-medium text-gray-600 mb-12 uppercase tracking-widest border-b-2 border-orange-400 inline-block pb-2">
             Official Unified Portal
